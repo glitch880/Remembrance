@@ -1,0 +1,13 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{855B3FCE-480D-1D29-2AAB-C097E69564C7}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "Remembrance",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
