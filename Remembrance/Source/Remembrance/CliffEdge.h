@@ -28,8 +28,11 @@ private:
 	UFUNCTION()
 		void EndOverlap(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	/** Mesh that will represent the cliff edge. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "mesh", meta = (AllowPrivateAccess = "true"))
-		UStaticMeshComponent* CliffMesh;
+	///** Mesh that will represent the cliff edge. */
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "mesh", meta = (AllowPrivateAccess = "true"))
+	//	UStaticMeshComponent* CliffMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CollisionBox", meta = (AllowPrivateAccess = "true"))
+		UBoxComponent* CollisionBox;
 
 };

@@ -12,11 +12,19 @@ ACliffEdge::ACliffEdge()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	//Create the static mesh for the cliff
-	CliffMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	CliffMesh->OnComponentBeginOverlap.AddDynamic(this, &ACliffEdge::BeginOverlap);
-	CliffMesh->OnComponentEndOverlap.AddDynamic(this, &ACliffEdge::EndOverlap);
-	RootComponent = CliffMesh;
+	////Create the static mesh for the cliff
+	//CliffMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	//CliffMesh->AttachTo(RootComponent);
+	//RootComponent = CliffMesh;
+
+	CollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Collision Box"));
+	CollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ACliffEdge::BeginOverlap);
+	CollisionBox->OnComponentEndOverlap.AddDynamic(this, &ACliffEdge::EndOverlap);
+	RootComponent = CollisionBox;
+
+	
+
+	
 
 }
 
@@ -40,6 +48,7 @@ void ACliffEdge::BeginOverlap(AActor * OtherActor, UPrimitiveComponent * OtherCo
 	{
 		ARemembranceCharacter* PlayerChar = Cast<ARemembranceCharacter>(OtherActor);
 		PlayerChar->SetIsOnEdge(true);
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Player entered cliff"));
 	}
 
 }
@@ -50,5 +59,6 @@ void ACliffEdge::EndOverlap(AActor * OtherActor, UPrimitiveComponent * OtherComp
 	{
 		ARemembranceCharacter* PlayerChar = Cast<ARemembranceCharacter>(OtherActor);
 		PlayerChar->SetIsOnEdge(false);
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Player exited cliff"));
 	}
 }
