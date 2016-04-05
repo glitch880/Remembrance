@@ -39,6 +39,11 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = Flying)
 		bool bCanFly;
 	
+	UPROPERTY(EditAnywhere, category="Transform")
+		AActor* ThirdPerson;
+	UPROPERTY(EditAnywhere, category="Transform")
+		AActor* FirstPerson;
+
 	float fSwimHeightVector;
 
 protected:

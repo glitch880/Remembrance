@@ -99,8 +99,9 @@ void ARemembranceCharacter::Tick(float DeltaSeconds)
 			if(bCanFly)
 				UE_LOG(LogTemp, Warning, TEXT("You are now flying as a bird!"));
 		}
+		
+	break;
 
-		break;
 	case MOVE_Swimming:
 	{
 		//enable swimming up
@@ -215,8 +216,18 @@ void ARemembranceCharacter::CustomCrouch()
 	case MOVE_None:
 		break;
 	case MOVE_Walking:
-		
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Camera plz"));
+		APlayerController* tempControll = GetWorld()->GetFirstPlayerController();
+
+		tempControll->SetViewTargetWithBlend(FirstPerson, 5.f);
+
+		bUseControllerRotationPitch = true;
+		bUseControllerRotationYaw = true;
+		bUseControllerRotationRoll = true;
+
 		break;
+	}
 	case MOVE_Falling:
 
 
