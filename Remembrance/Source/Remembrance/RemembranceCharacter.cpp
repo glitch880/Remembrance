@@ -66,8 +66,6 @@ void ARemembranceCharacter::SetupPlayerInputComponent(class UInputComponent* Inp
 	// handle touch devices
 	InputComponent->BindTouch(IE_Pressed, this, &ARemembranceCharacter::TouchStarted);
 	InputComponent->BindTouch(IE_Released, this, &ARemembranceCharacter::TouchStopped);
-
-	
 }
 
 
@@ -78,8 +76,6 @@ void ARemembranceCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector 
 	{
 		Jump();
 	}
-
-	GetWorld()->GetFirstPlayerController();
 }
 
 void ARemembranceCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)

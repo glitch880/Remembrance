@@ -15,10 +15,6 @@ class ARemembranceCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
-
-	/** bool that decides if the character stands on an edge or not */
-	bool bIsOnEdge;
-
 public:
 	ARemembranceCharacter();
 
@@ -69,11 +65,5 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-
-	/** Set if the character is on edge or not. */
-	FORCEINLINE void SetIsOnEdge(bool value) { bIsOnEdge = value; }
-
-	/** Get if character is on edge or not. */
-	FORCEINLINE bool GetIsOnEdge() const { return bIsOnEdge; }
 };
 
