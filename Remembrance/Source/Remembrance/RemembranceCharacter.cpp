@@ -17,6 +17,8 @@ ARemembranceCharacter::ARemembranceCharacter()
 	fJumpingTurnRate = 0.5f;
 	fFallTimeBeforeFlying = 2.0f;
 	fCurrentFallTime = 0.0f;
+	GroundTimeBeforeShapeshift = 2.0f;
+
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
@@ -90,18 +92,20 @@ void ARemembranceCharacter::Tick(float DeltaSeconds)
 		fCurrentFallTime = 0.0f;
 		break;
 	case MOVE_Falling:
-
+	{
 		fCurrentFallTime += 1.0f * DeltaSeconds;
 
 		if (fCurrentFallTime >= fFallTimeBeforeFlying)
 		{
 			OnTimeTriggered();
-			if(bCanFly)
+			if (bCanFly)
+			{
+				GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 				UE_LOG(LogTemp, Warning, TEXT("You are now flying as a bird!"));
+			}
 		}
-		
-	break;
-
+			break;
+	}
 	case MOVE_Swimming:
 	{
 		//enable swimming up
@@ -114,6 +118,16 @@ void ARemembranceCharacter::Tick(float DeltaSeconds)
 	}
 	case MOVE_Flying:
 		fCurrentFallTime = 0.0f;
+		
+		OnFlyingToWalkingTrigger();
+
+		if (bCanSwitchToWalking)
+		{
+			fCurrentGroundTime += 1.0f * DeltaSeconds;
+
+			if (fCurrentGroundTime >= GroundTimeBeforeShapeshift)
+				GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+		}
 
 		break;
 	}
@@ -149,6 +163,11 @@ void ARemembranceCharacter::LookUpAtRate(float Rate)
 }
 
 void ARemembranceCharacter::OnTimeTriggered_Implementation()
+{
+	// Logic needed when blueprints don't implement the event. Can be empty.
+}
+
+void ARemembranceCharacter::OnFlyingToWalkingTrigger_Implementation()
 {
 	// Logic needed when blueprints don't implement the event. Can be empty.
 }

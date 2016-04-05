@@ -33,11 +33,20 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = Flying, meta = (ClampMin = "0.0", ClampMax = "10.0", UIMin = "0.0", UIMax = "10.0"))
 	float fFallTimeBeforeFlying;
 
-	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = Flying, meta = (ClampMin = "-10000.0", ClampMax = "0.0", UIMin = "-10000.0", UIMax = "0.0"))
-		float LineTraceLenght;
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = Flying, meta = (ClampMin = "0.0", ClampMax = "10.0", UIMin = "0.0", UIMax = "10.0"))
+	float GroundTimeBeforeShapeshift;
 
-	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = Flying)
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = Flying, meta = (ClampMin = "-10000.0", ClampMax = "0.0", UIMin = "-10000.0", UIMax = "0.0"))
+		float FallingLineTraceLenght;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = Flying, meta = (ClampMin = "-10000.0", ClampMax = "0.0", UIMin = "-10000.0", UIMax = "0.0"))
+		float FlyingLineTraceLenght;
+
+	UPROPERTY(BlueprintReadWrite, Category = Flying)
 		bool bCanFly;
+
+	UPROPERTY(BlueprintReadWrite, Category = Flying)
+		bool bCanSwitchToWalking;
 	
 	UPROPERTY(EditAnywhere, category="Transform")
 		AActor* ThirdPerson;
@@ -93,6 +102,9 @@ private:
 	/** How long the character has currently fallen.*/
 	float fCurrentFallTime;
 
+	/** How long the character has currently fallen.*/
+	float fCurrentGroundTime;
+
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
@@ -101,6 +113,9 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Flying")
 	void OnTimeTriggered();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Flying")
+	void OnFlyingToWalkingTrigger();
 
 
 
