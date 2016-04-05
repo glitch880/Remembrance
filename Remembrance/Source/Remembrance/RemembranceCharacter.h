@@ -29,6 +29,8 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = Jumping, meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
 	float fJumpingTurnRate;
 
+	bool bIsOnEdge;
+
 protected:
 
 	/** Called for forwards/backward input */
@@ -65,5 +67,11 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	/** Set if the player is on an edge */
+	FORCEINLINE void SetIsOnEdge(bool value) { bIsOnEdge = value; }
+
+	/** Get if the player is on an edge or not */
+	FORCEINLINE bool GetIsOnEdge() const { return bIsOnEdge; }
 };
 
