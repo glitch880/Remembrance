@@ -78,6 +78,35 @@ void ARemembranceCharacter::SetupPlayerInputComponent(class UInputComponent* Inp
 	
 }
 
+void ARemembranceCharacter::Tick(float DeltaSeconds)
+{
+	switch (GetCharacterMovement()->MovementMode)
+	{
+	case MOVE_None:
+		break;
+	case MOVE_Walking:
+		
+		break;
+	case MOVE_Falling:
+
+
+		break;
+	case MOVE_Swimming:
+	{
+		//enable swimming up
+		FRotator Rotation = Controller->GetControlRotation();
+		FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Z);
+		AddMovementInput(Direction, fSwimHeightVector);
+		break;
+	}
+	case MOVE_Flying:
+
+
+		break;
+	}
+}
 
 void ARemembranceCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
 {
@@ -140,12 +169,14 @@ void ARemembranceCharacter::CustomJump()
 
 void ARemembranceCharacter::CustomStopJump()
 {
+	fSwimHeightVector = 0.0f;
 	switch (GetCharacterMovement()->MovementMode)
 	{
 	case MOVE_None:
 		break;
 	case MOVE_Walking:
 		ACharacter::StopJumping();
+
 		break;
 	case MOVE_Falling:
 
@@ -164,10 +195,50 @@ void ARemembranceCharacter::CustomStopJump()
 
 void ARemembranceCharacter::CustomCrouch()
 {
+	switch (GetCharacterMovement()->MovementMode)
+	{
+	case MOVE_None:
+		break;
+	case MOVE_Walking:
+		
+		break;
+	case MOVE_Falling:
+
+
+		break;
+	case MOVE_Swimming:
+		//enable swimming up
+		fSwimHeightVector = -1.0f;
+		break;
+	case MOVE_Flying:
+
+
+		break;
+	}
 }
 
 void ARemembranceCharacter::CustomStopCrouch()
 {
+	fSwimHeightVector = 0.0f;
+	switch (GetCharacterMovement()->MovementMode)
+	{
+	case MOVE_None:
+		break;
+	case MOVE_Walking:
+		
+		break;
+	case MOVE_Falling:
+
+
+		break;
+	case MOVE_Swimming:
+		
+		break;
+	case MOVE_Flying:
+
+
+		break;
+	}
 }
 
 void ARemembranceCharacter::MoveForward(float Value)
