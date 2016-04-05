@@ -58,3 +58,5 @@ Saved
 *.suo
 *.xcodeproj
 *.xcworkspace
+*.VC.opendb
+*.VC.db
