@@ -40,6 +40,10 @@ ARemembranceCharacter::ARemembranceCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
+
+
+	//Swimming setup
+	fSwimHeightVector = 0.0f;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -49,8 +53,12 @@ void ARemembranceCharacter::SetupPlayerInputComponent(class UInputComponent* Inp
 {
 	// Set up gameplay key bindings
 	check(InputComponent);
-	InputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	InputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	InputComponent->BindAction("Jump", IE_Pressed, this, &ARemembranceCharacter::CustomJump);
+	InputComponent->BindAction("Jump", IE_Released, this, &ARemembranceCharacter::CustomStopJump);
+
+	InputComponent->BindAction("Crouch", IE_Pressed, this, &ARemembranceCharacter::CustomCrouch);
+	InputComponent->BindAction("Crouch", IE_Released, this, &ARemembranceCharacter::CustomStopCrouch);
+
 
 	InputComponent->BindAxis("MoveForward", this, &ARemembranceCharacter::MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &ARemembranceCharacter::MoveRight);
@@ -100,6 +108,68 @@ void ARemembranceCharacter::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
+void ARemembranceCharacter::CustomJump()
+{
+	// find out which way is forward
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
+	// get forward vector
+	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+	switch (GetCharacterMovement()->MovementMode)
+	{
+	case MOVE_None:
+		break;
+	case MOVE_Walking:
+		ACharacter::Jump();
+		break;
+	case MOVE_Falling:
+
+		
+		break;
+	case MOVE_Swimming:
+		//enable swimming up
+		fSwimHeightVector = 1.0f;
+		break;
+	case MOVE_Flying:
+
+		
+		break;
+	}
+}
+
+void ARemembranceCharacter::CustomStopJump()
+{
+	switch (GetCharacterMovement()->MovementMode)
+	{
+	case MOVE_None:
+		break;
+	case MOVE_Walking:
+		ACharacter::StopJumping();
+		break;
+	case MOVE_Falling:
+
+
+		break;
+	case MOVE_Swimming:
+		//stop swimming
+		fSwimHeightVector = 0.0f;
+		break;
+	case MOVE_Flying:
+
+
+		break;
+	}
+}
+
+void ARemembranceCharacter::CustomCrouch()
+{
+}
+
+void ARemembranceCharacter::CustomStopCrouch()
+{
+}
+
 void ARemembranceCharacter::MoveForward(float Value)
 {
 	if ((Controller != NULL) && (Value != 0.0f))
@@ -107,19 +177,36 @@ void ARemembranceCharacter::MoveForward(float Value)
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
 		// get forward vector
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		if (!GetCharacterMovement()->IsFalling())
+
+		switch (GetCharacterMovement()->MovementMode)
 		{
+		case MOVE_None:
+			break;
+		case MOVE_Walking:
+			
 			GetCharacterMovement()->RotationRate.Yaw = 540.0f;
 			AddMovementInput(Direction, Value);
-		}
-		else
-		{
+			
+			break;
+		case MOVE_Falling:
+			
 			GetCharacterMovement()->RotationRate.Yaw = 540.0 * FMath::Clamp(fJumpingTurnRate, 0.0f, 1.0f);
 			AddMovementInput(Direction, Value);
+			break;
+		case MOVE_Swimming:
+		
+			GetCharacterMovement()->RotationRate.Yaw = 540.0f;
+			AddMovementInput(Direction, Value);
+			break;
+		case MOVE_Flying:
+			
+			GetCharacterMovement()->RotationRate.Yaw = 540.0f;
+			AddMovementInput(Direction, Value);
+			break;
 		}
+		
 	}
 }
 
@@ -130,19 +217,29 @@ void ARemembranceCharacter::MoveRight(float Value)
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
-	
+
 		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		// add movement in that direction
-		if (!GetCharacterMovement()->IsFalling())
+		switch (GetCharacterMovement()->MovementMode)
 		{
+		case MOVE_None:
+			break;
+		case MOVE_Walking:
 			GetCharacterMovement()->RotationRate.Yaw = 540.0f;
 			AddMovementInput(Direction, Value);
-		}
-		else
-		{
+			break;
+		case MOVE_Falling:
 			GetCharacterMovement()->RotationRate.Yaw = 540.0 * FMath::Clamp(fJumpingTurnRate, 0.0f, 1.0f);
 			AddMovementInput(Direction, Value);
+			break;
+		case MOVE_Swimming:
+			GetCharacterMovement()->RotationRate.Yaw = 540.0f;
+			AddMovementInput(Direction, Value);
+			break;
+		case MOVE_Flying:
+			GetCharacterMovement()->RotationRate.Yaw = 540.0f;
+			AddMovementInput(Direction, Value);
+			break;
 		}
 	}
 }

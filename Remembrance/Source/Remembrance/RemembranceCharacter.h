@@ -29,7 +29,17 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = Jumping, meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
 	float fJumpingTurnRate;
 
+	float fSwimHeightVector;
+
 protected:
+	//Called for actions using the "jump" key
+	void CustomJump();
+	void CustomStopJump();
+
+	//Called for actions using the "Crouch" key
+	void CustomCrouch();
+	void CustomStopCrouch();
+
 
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);
