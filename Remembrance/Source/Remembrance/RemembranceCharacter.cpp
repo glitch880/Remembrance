@@ -50,6 +50,7 @@ ARemembranceCharacter::ARemembranceCharacter()
 	//Swimming setup
 	fSwimHeightVector = 0.0f;
 	fTransformedSwimSpeed = 600.f;
+	bSubmerged = false;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -98,7 +99,7 @@ void ARemembranceCharacter::Tick(float DeltaSeconds)
 		if (fCurrentFallTime >= fFallTimeBeforeFlying)
 		{
 			OnTimeTriggered();
-			if (bCanFly)
+			if (!bCanFly)
 			{
 				GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 				UE_LOG(LogTemp, Warning, TEXT("You are now flying as a bird!"));
@@ -109,7 +110,8 @@ void ARemembranceCharacter::Tick(float DeltaSeconds)
 	case MOVE_Swimming:
 	{
 		//TODO increase time below surface if character  almost fully submerged. Potential solution : use line tract straight up and compare distance with a threshold.
-		if(GetCharacterMovement()->GetPhysicsVolume()  ) //change to condition
+		CheckSubmerged();
+		if(bSubmerged ) //change to condition
 		fcurrentTimeSubmerged += 1.0f * DeltaSeconds;
 
 		//enable swimming up
@@ -164,6 +166,11 @@ void ARemembranceCharacter::LookUpAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+}
+
+void ARemembranceCharacter::CheckSubmerged_Implementation()
+{
+	// Logic needed when blueprints don't implement the event. Can be empty.
 }
 
 void ARemembranceCharacter::OnTimeTriggered_Implementation()

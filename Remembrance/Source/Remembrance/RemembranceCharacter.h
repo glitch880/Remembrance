@@ -51,6 +51,10 @@ public:
 	//how long before transformation triggers / How long untill player runs out of air
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Swimming)
 		float fBreathTime;
+	//are we under water or not
+	UPROPERTY(BlueprintReadWrite, Category = Swimming)
+		bool bSubmerged;
+
 	//Speed in water form
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Swimming)
 		float fTransformedSwimSpeed;
@@ -128,7 +132,8 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Flying")
 	void OnFlyingToWalkingTrigger();
 
-
+	UFUNCTION(BlueprintNativeEvent, Category = "Swimming")
+		void CheckSubmerged();
 
 };
 
