@@ -78,6 +78,8 @@ void ARemembranceCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector 
 	{
 		Jump();
 	}
+
+	GetWorld()->GetFirstPlayerController();
 }
 
 void ARemembranceCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
