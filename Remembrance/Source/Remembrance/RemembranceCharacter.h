@@ -47,11 +47,20 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = Flying)
 		bool bCanSwitchToWalking;
-	
-	UPROPERTY(EditAnywhere, category="Transform")
-		AActor* ThirdPerson;
-	UPROPERTY(EditAnywhere, category="Transform")
-		AActor* FirstPerson;
+
+	//how long before transformation triggers / How long untill player runs out of air
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Swimming)
+		float fBreathTime;
+	//Speed in water form
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Swimming)
+		float fTransformedSwimSpeed;
+
+
+	UPROPERTY(EditAnywhere, category="Cameras")
+		AActor* ThirdPersonCamera;
+	UPROPERTY(EditAnywhere, category="Cameras")
+		AActor* FirstPersonCamera;
+
 
 	float fSwimHeightVector;
 
@@ -98,6 +107,8 @@ protected:
 
 private:
 
+	//how long the character has been submerged
+	float fcurrentTimeSubmerged;
 
 	/** How long the character has currently fallen.*/
 	float fCurrentFallTime;

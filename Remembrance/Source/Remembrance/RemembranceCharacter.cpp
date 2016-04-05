@@ -49,6 +49,7 @@ ARemembranceCharacter::ARemembranceCharacter()
 
 	//Swimming setup
 	fSwimHeightVector = 0.0f;
+	fTransformedSwimSpeed = 600.f;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -63,7 +64,6 @@ void ARemembranceCharacter::SetupPlayerInputComponent(class UInputComponent* Inp
 
 	InputComponent->BindAction("Crouch", IE_Pressed, this, &ARemembranceCharacter::CustomCrouch);
 	InputComponent->BindAction("Crouch", IE_Released, this, &ARemembranceCharacter::CustomStopCrouch);
-
 
 	InputComponent->BindAxis("MoveForward", this, &ARemembranceCharacter::MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &ARemembranceCharacter::MoveRight);
@@ -108,6 +108,10 @@ void ARemembranceCharacter::Tick(float DeltaSeconds)
 	}
 	case MOVE_Swimming:
 	{
+		//TODO increase time below surface if character  almost fully submerged. Potential solution : use line tract straight up and compare distance with a threshold.
+		if(GetCharacterMovement()->GetPhysicsVolume()  ) //change to condition
+		fcurrentTimeSubmerged += 1.0f * DeltaSeconds;
+
 		//enable swimming up
 		FRotator Rotation = Controller->GetControlRotation();
 		FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -236,21 +240,29 @@ void ARemembranceCharacter::CustomCrouch()
 		break;
 	case MOVE_Walking:
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Camera plz"));
+	/*	UE_LOG(LogTemp, Warning, TEXT("Camera plz"));
 		APlayerController* tempControll = GetWorld()->GetFirstPlayerController();
 
 		tempControll->SetViewTargetWithBlend(FirstPerson, 5.f);
 
 		bUseControllerRotationPitch = true;
 		bUseControllerRotationYaw = true;
-		bUseControllerRotationRoll = true;
+		bUseControllerRotationRoll = true; */
 
 		break;
 	}
-	case MOVE_Falling:
+	case MOVE_Falling: 
+	{
+	/*	APlayerController* tempControll = GetWorld()->GetFirstPlayerController();
 
+		tempControll->SetViewTargetWithBlend(ThirdPerson, 5.f);
+
+		bUseControllerRotationPitch = false;
+		bUseControllerRotationYaw = false;
+		bUseControllerRotationRoll = false; */
 
 		break;
+	}
 	case MOVE_Swimming:
 		//enable swimming up
 		fSwimHeightVector = -1.0f;
