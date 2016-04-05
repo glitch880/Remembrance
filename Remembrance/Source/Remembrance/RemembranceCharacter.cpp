@@ -15,11 +15,14 @@ ARemembranceCharacter::ARemembranceCharacter()
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
 	fJumpingTurnRate = 0.5f;
+	fFallTimeBeforeFlying = 2.0f;
+	fCurrentFallTime = 0.0f;
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
+	bCanFly = false;
 
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
@@ -76,6 +79,7 @@ void ARemembranceCharacter::SetupPlayerInputComponent(class UInputComponent* Inp
 	InputComponent->BindTouch(IE_Released, this, &ARemembranceCharacter::TouchStopped);
 }
 
+
 void ARemembranceCharacter::Tick(float DeltaSeconds)
 {
 	switch (GetCharacterMovement()->MovementMode)
@@ -83,10 +87,18 @@ void ARemembranceCharacter::Tick(float DeltaSeconds)
 	case MOVE_None:
 		break;
 	case MOVE_Walking:
-		
+		fCurrentFallTime = 0.0f;
 		break;
 	case MOVE_Falling:
 
+		fCurrentFallTime += 1.0f * DeltaSeconds;
+
+		if (fCurrentFallTime >= fFallTimeBeforeFlying)
+		{
+			OnTimeTriggered();
+			if(bCanFly)
+				UE_LOG(LogTemp, Warning, TEXT("You are now flying as a bird!"));
+		}
 
 		break;
 	case MOVE_Swimming:
@@ -100,7 +112,7 @@ void ARemembranceCharacter::Tick(float DeltaSeconds)
 		break;
 	}
 	case MOVE_Flying:
-
+		fCurrentFallTime = 0.0f;
 
 		break;
 	}
@@ -135,6 +147,11 @@ void ARemembranceCharacter::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
+void ARemembranceCharacter::OnTimeTriggered_Implementation()
+{
+	// Logic needed when blueprints don't implement the event. Can be empty.
+}
+
 void ARemembranceCharacter::CustomJump()
 {
 	// find out which way is forward
@@ -151,7 +168,6 @@ void ARemembranceCharacter::CustomJump()
 		ACharacter::Jump();
 		break;
 	case MOVE_Falling:
-
 		
 		break;
 	case MOVE_Swimming:

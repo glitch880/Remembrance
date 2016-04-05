@@ -15,6 +15,7 @@ class ARemembranceCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
+
 public:
 	ARemembranceCharacter();
 
@@ -28,9 +29,17 @@ public:
 
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = Jumping, meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
 	float fJumpingTurnRate;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = Flying, meta = (ClampMin = "0.0", ClampMax = "10.0", UIMin = "0.0", UIMax = "10.0"))
+	float fFallTimeBeforeFlying;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = Flying, meta = (ClampMin = "-10000.0", ClampMax = "0.0", UIMin = "-10000.0", UIMax = "0.0"))
+		float LineTraceLenght;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = Flying)
+		bool bCanFly;
 	
 	float fSwimHeightVector;
-	bool bIsOnEdge;
 
 protected:
 	//Called for actions using the "jump" key
@@ -69,10 +78,15 @@ protected:
 	/** Tick Function for the character **/
 	virtual void Tick(float DeltaSeconds) override;
 
-protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 	// End of APawn interface
+
+private:
+
+
+	/** How long the character has currently fallen.*/
+	float fCurrentFallTime;
 
 public:
 	/** Returns CameraBoom subobject **/
@@ -80,10 +94,10 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
-	/** Set if the player is on an edge */
-	FORCEINLINE void SetIsOnEdge(bool value) { bIsOnEdge = value; }
+	UFUNCTION(BlueprintNativeEvent, Category = "Flying")
+	void OnTimeTriggered();
 
-	/** Get if the player is on an edge or not */
-	FORCEINLINE bool GetIsOnEdge() const { return bIsOnEdge; }
+
+
 };
 
