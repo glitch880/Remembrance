@@ -14,6 +14,7 @@ ARemembranceCharacter::ARemembranceCharacter()
 	// set our turn rates for input
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
+	fJumpingTurnRate = 0.5f;
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
@@ -65,6 +66,8 @@ void ARemembranceCharacter::SetupPlayerInputComponent(class UInputComponent* Inp
 	// handle touch devices
 	InputComponent->BindTouch(IE_Pressed, this, &ARemembranceCharacter::TouchStarted);
 	InputComponent->BindTouch(IE_Released, this, &ARemembranceCharacter::TouchStopped);
+
+	
 }
 
 
@@ -107,13 +110,22 @@ void ARemembranceCharacter::MoveForward(float Value)
 
 		// get forward vector
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
+		if (!GetCharacterMovement()->IsFalling())
+		{
+			GetCharacterMovement()->RotationRate.Yaw = 540.0f;
+			AddMovementInput(Direction, Value);
+		}
+		else
+		{
+			GetCharacterMovement()->RotationRate.Yaw = 540.0 * FMath::Clamp(fJumpingTurnRate, 0.0f, 1.0f);
+			AddMovementInput(Direction, Value);
+		}
 	}
 }
 
 void ARemembranceCharacter::MoveRight(float Value)
 {
-	if ( (Controller != NULL) && (Value != 0.0f) )
+	if ( (Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -122,6 +134,15 @@ void ARemembranceCharacter::MoveRight(float Value)
 		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
-		AddMovementInput(Direction, Value);
+		if (!GetCharacterMovement()->IsFalling())
+		{
+			GetCharacterMovement()->RotationRate.Yaw = 540.0f;
+			AddMovementInput(Direction, Value);
+		}
+		else
+		{
+			GetCharacterMovement()->RotationRate.Yaw = 540.0 * FMath::Clamp(fJumpingTurnRate, 0.0f, 1.0f);
+			AddMovementInput(Direction, Value);
+		}
 	}
 }
