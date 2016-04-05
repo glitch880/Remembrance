@@ -156,6 +156,7 @@ void ARemembranceCharacter::CustomJump()
 		break;
 	case MOVE_Swimming:
 		//enable swimming up
+		UE_LOG(LogTemp, Warning, TEXT("Swimming up"));
 		fSwimHeightVector = 1.0f;
 		break;
 	case MOVE_Flying:
