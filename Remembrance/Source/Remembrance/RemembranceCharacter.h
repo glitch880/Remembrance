@@ -30,6 +30,9 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = Jumping, meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
 	float fJumpingTurnRate;
 
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = Jumping)
+		float StandardYawRotation;
+
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = Flying, meta = (ClampMin = "0.0", ClampMax = "10.0", UIMin = "0.0", UIMax = "10.0"))
 	float fFallTimeBeforeFlying;
 
@@ -108,6 +111,15 @@ protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 	// End of APawn interface
+
+	/** This happens when switching from one Movement_type to another manually */
+	void SwitchMovementType(EMovementMode mode);
+
+	/** Function that checks if we should start flying */
+	void CheckIfWeShouldFly(float DeltaSeconds);
+
+	/** Function that checks if we should stop flying */
+	void CheckIfWeShouldStopFlying(float DeltaSeconds);
 
 private:
 

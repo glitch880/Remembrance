@@ -18,6 +18,7 @@ ARemembranceCharacter::ARemembranceCharacter()
 	fFallTimeBeforeFlying = 2.0f;
 	fCurrentFallTime = 0.0f;
 	GroundTimeBeforeShapeshift = 2.0f;
+	StandardYawRotation = 540.f;
 
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
@@ -82,6 +83,36 @@ void ARemembranceCharacter::SetupPlayerInputComponent(class UInputComponent* Inp
 	InputComponent->BindTouch(IE_Released, this, &ARemembranceCharacter::TouchStopped);
 }
 
+void ARemembranceCharacter::SwitchMovementType(EMovementMode mode)
+{
+	GetCharacterMovement()->SetMovementMode(mode);
+
+	switch (GetCharacterMovement()->MovementMode)
+	{
+		case MOVE_None:
+			break;
+		case MOVE_Walking:
+			fCurrentFallTime = 0.0f;
+			break;
+		case MOVE_Falling:
+		{
+			break;
+		}
+		case MOVE_Swimming:
+		{
+			break;
+		}
+		case MOVE_Flying:
+		{
+			fCurrentFallTime = 0.0f;
+
+			break;
+		}
+
+	}
+
+}
+
 
 void ARemembranceCharacter::Tick(float DeltaSeconds)
 {
@@ -90,22 +121,13 @@ void ARemembranceCharacter::Tick(float DeltaSeconds)
 	case MOVE_None:
 		break;
 	case MOVE_Walking:
-		fCurrentFallTime = 0.0f;
 		break;
 	case MOVE_Falling:
 	{
-		fCurrentFallTime += 1.0f * DeltaSeconds;
+		//If we are falling then we should check if we can start flying instead.
+		CheckIfWeShouldFly(DeltaSeconds);
 
-		if (fCurrentFallTime >= fFallTimeBeforeFlying)
-		{
-			OnTimeTriggered();
-			if (!bCanFly)
-			{
-				GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-				UE_LOG(LogTemp, Warning, TEXT("You are now flying as a bird!"));
-			}
-		}
-			break;
+		break;
 	}
 	case MOVE_Swimming:
 	{
@@ -123,17 +145,9 @@ void ARemembranceCharacter::Tick(float DeltaSeconds)
 		break;
 	}
 	case MOVE_Flying:
-		fCurrentFallTime = 0.0f;
-		
-		OnFlyingToWalkingTrigger();
 
-		if (bCanSwitchToWalking)
-		{
-			fCurrentGroundTime += 1.0f * DeltaSeconds;
-
-			if (fCurrentGroundTime >= GroundTimeBeforeShapeshift)
-				GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-		}
+		//If we are flying, we should constantly check if we should continue or stop.
+		CheckIfWeShouldStopFlying(DeltaSeconds);
 
 		break;
 	}
@@ -321,23 +335,23 @@ void ARemembranceCharacter::MoveForward(float Value)
 			break;
 		case MOVE_Walking:
 			
-			GetCharacterMovement()->RotationRate.Yaw = 540.0f;
+			GetCharacterMovement()->RotationRate.Yaw = StandardYawRotation;
 			AddMovementInput(Direction, Value);
 			
 			break;
 		case MOVE_Falling:
 			
-			GetCharacterMovement()->RotationRate.Yaw = 540.0 * FMath::Clamp(fJumpingTurnRate, 0.0f, 1.0f);
+			GetCharacterMovement()->RotationRate.Yaw = StandardYawRotation * FMath::Clamp(fJumpingTurnRate, 0.0f, 1.0f);
 			AddMovementInput(Direction, Value);
 			break;
 		case MOVE_Swimming:
 		
-			GetCharacterMovement()->RotationRate.Yaw = 540.0f;
+			GetCharacterMovement()->RotationRate.Yaw = StandardYawRotation;
 			AddMovementInput(Direction, Value);
 			break;
 		case MOVE_Flying:
 			
-			GetCharacterMovement()->RotationRate.Yaw = 540.0f;
+			GetCharacterMovement()->RotationRate.Yaw = StandardYawRotation;
 			AddMovementInput(Direction, Value);
 			break;
 		}
@@ -360,21 +374,50 @@ void ARemembranceCharacter::MoveRight(float Value)
 		case MOVE_None:
 			break;
 		case MOVE_Walking:
-			GetCharacterMovement()->RotationRate.Yaw = 540.0f;
+			GetCharacterMovement()->RotationRate.Yaw = StandardYawRotation;
 			AddMovementInput(Direction, Value);
 			break;
 		case MOVE_Falling:
-			GetCharacterMovement()->RotationRate.Yaw = 540.0 * FMath::Clamp(fJumpingTurnRate, 0.0f, 1.0f);
+			GetCharacterMovement()->RotationRate.Yaw = StandardYawRotation * FMath::Clamp(fJumpingTurnRate, 0.0f, 1.0f);
 			AddMovementInput(Direction, Value);
 			break;
 		case MOVE_Swimming:
-			GetCharacterMovement()->RotationRate.Yaw = 540.0f;
+			GetCharacterMovement()->RotationRate.Yaw = StandardYawRotation;
 			AddMovementInput(Direction, Value);
 			break;
 		case MOVE_Flying:
-			GetCharacterMovement()->RotationRate.Yaw = 540.0f;
+			GetCharacterMovement()->RotationRate.Yaw = StandardYawRotation;
 			AddMovementInput(Direction, Value);
 			break;
 		}
+	}
+}
+
+
+void ARemembranceCharacter::CheckIfWeShouldFly(float DeltaSeconds)
+{
+	fCurrentFallTime += 1.0f * DeltaSeconds;
+
+	if (fCurrentFallTime >= fFallTimeBeforeFlying)
+	{
+		OnTimeTriggered();
+		if (!bCanFly)
+		{
+			SwitchMovementType(MOVE_Flying);
+			UE_LOG(LogTemp, Warning, TEXT("You are now flying as a bird!"));
+		}
+	}
+}
+
+void ARemembranceCharacter::CheckIfWeShouldStopFlying(float DeltaSeconds)
+{
+	OnFlyingToWalkingTrigger();
+
+	if (bCanSwitchToWalking)
+	{
+		fCurrentGroundTime += 1.0f * DeltaSeconds;
+
+		if (fCurrentGroundTime >= GroundTimeBeforeShapeshift)
+			SwitchMovementType(MOVE_Walking);
 	}
 }
