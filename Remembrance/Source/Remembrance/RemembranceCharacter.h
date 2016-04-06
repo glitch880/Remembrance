@@ -62,13 +62,22 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Swimming)
 		float fTransformedSwimSpeed;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Swimming)
+		float fJumpOutOfWaterMaxVelocity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Swimming)
+		float fMinWaterJumpVelocity;
+
+	//how long the character has been submerged
+	UPROPERTY(BlueprintReadOnly)
+		float fCurrentTimeSubmerged;  //TODO should not be public
 
 	UPROPERTY(EditAnywhere, category="Cameras")
 		AActor* ThirdPersonCamera;
 	UPROPERTY(EditAnywhere, category="Cameras")
 		AActor* FirstPersonCamera;
 
-
+	//sets direction of Z movement in water
 	float fSwimHeightVector;
 
 protected:
@@ -121,10 +130,14 @@ protected:
 	/** Function that checks if we should stop flying */
 	void CheckIfWeShouldStopFlying(float DeltaSeconds);
 
+	void TransformWater();
+
 private:
 
-	//how long the character has been submerged
-	float fcurrentTimeSubmerged;
+	//Check to see if already transformed so we don't call the same func all the time
+	bool bIsTransformedWater;
+
+	bool bHasJumpedInWater;
 
 	/** How long the character has currently fallen.*/
 	float fCurrentFallTime;
@@ -145,7 +158,7 @@ public:
 	void OnFlyingToWalkingTrigger();
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Swimming")
-		void CheckSubmerged();
+	void CheckSubmerged();
 
 };
 

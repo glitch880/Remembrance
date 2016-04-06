@@ -2,6 +2,7 @@
 
 #include "Remembrance.h"
 #include "RemembranceCharacter.h"
+#include "Engine.h" //TODO remove this
 
 //////////////////////////////////////////////////////////////////////////
 // ARemembranceCharacter
@@ -52,6 +53,11 @@ ARemembranceCharacter::ARemembranceCharacter()
 	fSwimHeightVector = 0.0f;
 	fTransformedSwimSpeed = 600.f;
 	bSubmerged = false;
+	bIsTransformedWater = false;
+	fBreathTime = 10;
+	bHasJumpedInWater = false;
+	fJumpOutOfWaterMaxVelocity = 600;
+	fMinWaterJumpVelocity = 1600;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -116,32 +122,58 @@ void ARemembranceCharacter::SwitchMovementType(EMovementMode mode)
 
 void ARemembranceCharacter::Tick(float DeltaSeconds)
 {
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Current Z velocity %f"), GetCharacterMovement()->Velocity.Z));
 	switch (GetCharacterMovement()->MovementMode)
 	{
 	case MOVE_None:
 		break;
 	case MOVE_Walking:
+		fCurrentTimeSubmerged = 0;
 		break;
 	case MOVE_Falling:
 	{
 		//If we are falling then we should check if we can start flying instead.
 		CheckIfWeShouldFly(DeltaSeconds);
-
+		//bHasJumpedInWater = false;
 		break;
 	}
 	case MOVE_Swimming:
 	{
 		//TODO increase time below surface if character  almost fully submerged. Potential solution : use line tract straight up and compare distance with a threshold.
 		CheckSubmerged();
-		if(bSubmerged ) //change to condition
-		fcurrentTimeSubmerged += 1.0f * DeltaSeconds;
+		if (bSubmerged) //change to condition
+			fCurrentTimeSubmerged += 1.0f * DeltaSeconds;
+		else
+			fCurrentTimeSubmerged = 0;
+
+		if (fCurrentTimeSubmerged > fBreathTime && !bIsTransformedWater) //transform
+			TransformWater();
+
 
 		//enable swimming up
 		FRotator Rotation = Controller->GetControlRotation();
 		FRotator YawRotation(0, Rotation.Yaw, 0);
 
 		FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Z);
-		AddMovementInput(Direction, fSwimHeightVector);
+		AddMovementInput(Direction, fSwimHeightVector*fTransformedSwimSpeed*DeltaSeconds);
+
+		//if not submerged
+		if (!bSubmerged && fSwimHeightVector > 0 && GetCharacterMovement()->Velocity.Z > 0  && !bHasJumpedInWater)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Activating jump out of water  %f %f"), GetCharacterMovement()->Velocity.Z, GetVelocity().Z));
+			float vel = GetVelocity().Z * 2;
+			if (vel < fMinWaterJumpVelocity)
+				vel = fMinWaterJumpVelocity;
+
+			//GetCharacterMovement()->AddImpulse(FVector(0, 0, GetCharacterMovement()->Velocity.Z*10)*fSwimHeightVector, true);
+			GetCharacterMovement()->Velocity.Z += vel;
+			
+			bHasJumpedInWater = true;
+			//LaunchCharacter((FVector(0, 0, GetCharacterMovement()->Velocity.Z )*fSwimHeightVector), true, true);
+			//GetCharacterMovement()->Launch(FVector(0, 0, GetCharacterMovement()->Velocity.Z)*fSwimHeightVector);
+		}
+		else if (bSubmerged)
+			bHasJumpedInWater = false;
 		break;
 	}
 	case MOVE_Flying:
@@ -213,12 +245,13 @@ void ARemembranceCharacter::CustomJump()
 		ACharacter::Jump();
 		break;
 	case MOVE_Falling:
-		
+	//	UE_LOG(LogTemp, Warning, TEXT("Falling, can't jump"));
 		break;
 	case MOVE_Swimming:
 		//enable swimming up
-		UE_LOG(LogTemp, Warning, TEXT("Swimming up"));
+		//UE_LOG(LogTemp, Warning, TEXT("Swimming up"));
 		fSwimHeightVector = 1.0f;
+		
 		break;
 	case MOVE_Flying:
 
@@ -420,4 +453,13 @@ void ARemembranceCharacter::CheckIfWeShouldStopFlying(float DeltaSeconds)
 		if (fCurrentGroundTime >= GroundTimeBeforeShapeshift)
 			SwitchMovementType(MOVE_Walking);
 	}
+}
+//Transform into water creature. Change swim speed, model, anim, effects mm.
+void ARemembranceCharacter::TransformWater()
+{
+	//TODO placeholder
+	UE_LOG(LogTemp, Warning, TEXT("You are  water creature"));
+	GetCharacterMovement()->MaxSwimSpeed = fTransformedSwimSpeed;
+
+
 }
