@@ -2,12 +2,14 @@
 
 #include "Remembrance.h"
 #include "RemembranceCharacter.h"
+#include "CustomCharacterMovementComponent.h"
 #include "Engine.h" //TODO remove this
 
 //////////////////////////////////////////////////////////////////////////
 // ARemembranceCharacter
 
-ARemembranceCharacter::ARemembranceCharacter()
+ARemembranceCharacter::ARemembranceCharacter(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCustomCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -89,9 +91,9 @@ void ARemembranceCharacter::SetupPlayerInputComponent(class UInputComponent* Inp
 	InputComponent->BindTouch(IE_Released, this, &ARemembranceCharacter::TouchStopped);
 }
 
-void ARemembranceCharacter::SwitchMovementType(EMovementMode mode)
+void ARemembranceCharacter::SwitchMovementType(EMovementMode Mode, uint8 Custom = 0)
 {
-	GetCharacterMovement()->SetMovementMode(mode);
+	GetCharacterMovement()->SetMovementMode(Mode, Custom);
 
 	switch (GetCharacterMovement()->MovementMode)
 	{
@@ -114,7 +116,11 @@ void ARemembranceCharacter::SwitchMovementType(EMovementMode mode)
 
 			break;
 		}
+		case MOVE_Custom:
+		{
 
+			break;
+		}
 	}
 
 }
@@ -148,7 +154,7 @@ void ARemembranceCharacter::Tick(float DeltaSeconds)
 
 		if (fCurrentTimeSubmerged > fBreathTime && !bIsTransformedWater) //transform
 			TransformWater();
-
+		
 
 		//enable swimming up
 		FRotator Rotation = Controller->GetControlRotation();
@@ -181,6 +187,11 @@ void ARemembranceCharacter::Tick(float DeltaSeconds)
 		//If we are flying, we should constantly check if we should continue or stop.
 		CheckIfWeShouldStopFlying(DeltaSeconds);
 
+		break;
+	case MOVE_Custom:
+		//tick for custom
+		//If we are flying, we should constantly check if we should continue or stop.
+		CheckIfWeShouldStopFlying(DeltaSeconds);
 		break;
 	}
 }
@@ -257,6 +268,10 @@ void ARemembranceCharacter::CustomJump()
 
 		
 		break;
+	case MOVE_Custom:
+		//tick for custom
+		
+		break;
 	}
 }
 
@@ -283,6 +298,9 @@ void ARemembranceCharacter::CustomStopJump()
 
 
 		break;
+	case MOVE_Custom:
+		//tick for custom
+		break;
 	}
 }
 
@@ -302,6 +320,9 @@ void ARemembranceCharacter::CustomCrouch()
 		bUseControllerRotationPitch = true;
 		bUseControllerRotationYaw = true;
 		bUseControllerRotationRoll = true; */
+
+		UE_LOG(LogTemp, Warning, TEXT("You are now custom!"));
+		GetCharacterMovement()->SetMovementMode(MOVE_Custom);
 
 		break;
 	}
@@ -324,6 +345,10 @@ void ARemembranceCharacter::CustomCrouch()
 	case MOVE_Flying:
 
 
+		break;
+	case MOVE_Custom:
+		//tick for custom
+		
 		break;
 	}
 }
@@ -349,6 +374,10 @@ void ARemembranceCharacter::CustomStopCrouch()
 
 
 		break;
+	case MOVE_Custom:
+		//tick for custom
+		//GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+		break;
 	}
 }
 
@@ -367,26 +396,39 @@ void ARemembranceCharacter::MoveForward(float Value)
 		case MOVE_None:
 			break;
 		case MOVE_Walking:
-			
+
 			GetCharacterMovement()->RotationRate.Yaw = StandardYawRotation;
 			AddMovementInput(Direction, Value);
-			
+
 			break;
 		case MOVE_Falling:
-			
+
 			GetCharacterMovement()->RotationRate.Yaw = StandardYawRotation * FMath::Clamp(fJumpingTurnRate, 0.0f, 1.0f);
 			AddMovementInput(Direction, Value);
 			break;
 		case MOVE_Swimming:
-		
+
 			GetCharacterMovement()->RotationRate.Yaw = StandardYawRotation;
 			AddMovementInput(Direction, Value);
 			break;
 		case MOVE_Flying:
-			
+
 			GetCharacterMovement()->RotationRate.Yaw = StandardYawRotation;
 			AddMovementInput(Direction, Value);
 			break;
+		case MOVE_Custom:
+		{
+			GetCharacterMovement()->RotationRate.Yaw = StandardYawRotation;
+			const FRotator RotationC = this->GetActorRotation();// Controller->GetControlRotation();
+			
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Aliens, %f, %f, %f"), RotationC.Pitch, RotationC.Yaw, RotationC.Roll));
+			const FRotator YawRotationC(0, RotationC.Yaw, 0);
+			// get forward vector
+			const FVector DirectionC = FRotationMatrix(YawRotationC).GetUnitAxis(EAxis::X);
+			AddMovementInput(DirectionC, Value);
+
+			break;
+		}
 		}
 		
 	}
@@ -422,6 +464,10 @@ void ARemembranceCharacter::MoveRight(float Value)
 			GetCharacterMovement()->RotationRate.Yaw = StandardYawRotation;
 			AddMovementInput(Direction, Value);
 			break;
+		case MOVE_Custom:
+		//	GetCharacterMovement()->RotationRate.Yaw = StandardYawRotation;
+		//	AddMovementInput(Direction, Value);
+			break;
 		}
 	}
 }
@@ -436,7 +482,7 @@ void ARemembranceCharacter::CheckIfWeShouldFly(float DeltaSeconds)
 		OnTimeTriggered();
 		if (!bCanFly)
 		{
-			SwitchMovementType(MOVE_Flying);
+			SwitchMovementType(MOVE_Custom, 1);
 			UE_LOG(LogTemp, Warning, TEXT("You are now flying as a bird!"));
 		}
 	}

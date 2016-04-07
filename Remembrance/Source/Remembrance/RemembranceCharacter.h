@@ -17,7 +17,7 @@ class ARemembranceCharacter : public ACharacter
 	class UCameraComponent* FollowCamera;
 
 public:
-	ARemembranceCharacter();
+	ARemembranceCharacter(const FObjectInitializer& ObjectInitializer);
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
@@ -122,7 +122,7 @@ protected:
 	// End of APawn interface
 
 	/** This happens when switching from one Movement_type to another manually */
-	void SwitchMovementType(EMovementMode mode);
+	void SwitchMovementType(EMovementMode Mode, uint8 Custom);
 
 	/** Function that checks if we should start flying */
 	void CheckIfWeShouldFly(float DeltaSeconds);
