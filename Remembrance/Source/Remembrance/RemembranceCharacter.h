@@ -1,6 +1,7 @@
 // Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
 #pragma once
 #include "GameFramework/Character.h"
+#include "FlyingComp.h"
 #include "RemembranceCharacter.generated.h"
 
 UCLASS(config=Game)
@@ -11,6 +12,10 @@ class ARemembranceCharacter : public ACharacter
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
+
+	/** Follow camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UFlyingComp* FlyingComponent;
 
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -146,6 +151,19 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Swimming")
 		void CheckSubmerged();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Flying")
+		void FlyingCollisionTrigger();
+
+	UFUNCTION(BlueprintCallable, Category = "Flying")
+		void SetLengthToObject(float Lenght);
+
+	UFUNCTION(BlueprintCallable, Category = "Flying")
+		void SetCollisionDetected(bool Collision);
+
+	UFUNCTION(BlueprintCallable, Category = "Flying")
+		void SetPushValue(float value);
+	
 
 };
 
