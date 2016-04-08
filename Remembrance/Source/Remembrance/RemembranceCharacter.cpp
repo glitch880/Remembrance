@@ -2,14 +2,14 @@
 
 #include "Remembrance.h"
 #include "RemembranceCharacter.h"
-#include "CustomCharacterMovementComponent.h"
+
 #include "Engine.h" //TODO remove this
 
 //////////////////////////////////////////////////////////////////////////
 // ARemembranceCharacter
 
-ARemembranceCharacter::ARemembranceCharacter(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCustomCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
+ARemembranceCharacter::ARemembranceCharacter()
+
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -322,7 +322,7 @@ void ARemembranceCharacter::CustomCrouch()
 		bUseControllerRotationRoll = true; */
 
 		UE_LOG(LogTemp, Warning, TEXT("You are now custom!"));
-		GetCharacterMovement()->SetMovementMode(MOVE_Custom);
+		//GetCharacterMovement()->SetMovementMode(MOVE_Custom);
 
 		break;
 	}
@@ -420,8 +420,9 @@ void ARemembranceCharacter::MoveForward(float Value)
 		{
 			GetCharacterMovement()->RotationRate.Yaw = StandardYawRotation;
 			const FRotator RotationC = this->GetActorRotation();// Controller->GetControlRotation();
+			//this->GetMesh()->contrains
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Aliens, %f, %f"), RotationC.Yaw));
 			
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Aliens, %f, %f, %f"), RotationC.Pitch, RotationC.Yaw, RotationC.Roll));
 			const FRotator YawRotationC(0, RotationC.Yaw, 0);
 			// get forward vector
 			const FVector DirectionC = FRotationMatrix(YawRotationC).GetUnitAxis(EAxis::X);
@@ -482,7 +483,8 @@ void ARemembranceCharacter::CheckIfWeShouldFly(float DeltaSeconds)
 		OnTimeTriggered();
 		if (!bCanFly)
 		{
-			SwitchMovementType(MOVE_Custom, 1);
+			SwitchMovementType(MOVE_Flying);
+			CapsuleComponent->SetSimulatePhysics(true);
 			UE_LOG(LogTemp, Warning, TEXT("You are now flying as a bird!"));
 		}
 	}
@@ -497,7 +499,10 @@ void ARemembranceCharacter::CheckIfWeShouldStopFlying(float DeltaSeconds)
 		fCurrentGroundTime += 1.0f * DeltaSeconds;
 
 		if (fCurrentGroundTime >= GroundTimeBeforeShapeshift)
+		{
 			SwitchMovementType(MOVE_Walking);
+			CapsuleComponent->SetSimulatePhysics(false);
+		}
 	}
 }
 //Transform into water creature. Change swim speed, model, anim, effects mm.

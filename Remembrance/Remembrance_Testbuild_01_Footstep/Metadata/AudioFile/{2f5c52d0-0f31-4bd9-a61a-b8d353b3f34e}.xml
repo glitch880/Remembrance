@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.01.08.00">
+    <object class="AudioFile" id="{2f5c52d0-0f31-4bd9-a61a-b8d353b3f34e}">
+        <property name="assetPath">
+            <value>Footstep_Mjukt_Grus_07.wav</value>
+        </property>
+        <property name="frequencyInKHz">
+            <value>44.0999985</value>
+        </property>
+        <property name="channelCount">
+            <value>1</value>
+        </property>
+        <property name="length">
+            <value>0.4731972789115646</value>
+        </property>
+        <relationship name="masterAssetFolder">
+            <destination>{e85b13db-6ae3-474f-8ad2-39ed8e96d86e}</destination>
+        </relationship>
+    </object>
+</objects>

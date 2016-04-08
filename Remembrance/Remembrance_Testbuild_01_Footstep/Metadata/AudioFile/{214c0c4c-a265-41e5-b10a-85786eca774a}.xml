@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.01.08.00">
+    <object class="AudioFile" id="{214c0c4c-a265-41e5-b10a-85786eca774a}">
+        <property name="assetPath">
+            <value>Character_Walking_Clothes_Soft_04.wav</value>
+        </property>
+        <property name="frequencyInKHz">
+            <value>44.0999985</value>
+        </property>
+        <property name="channelCount">
+            <value>1</value>
+        </property>
+        <property name="length">
+            <value>0.31335600907029476</value>
+        </property>
+        <relationship name="masterAssetFolder">
+            <destination>{e85b13db-6ae3-474f-8ad2-39ed8e96d86e}</destination>
+        </relationship>
+    </object>
+</objects>

@@ -17,7 +17,7 @@ class ARemembranceCharacter : public ACharacter
 	class UCameraComponent* FollowCamera;
 
 public:
-	ARemembranceCharacter(const FObjectInitializer& ObjectInitializer);
+	ARemembranceCharacter();
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
