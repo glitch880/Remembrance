@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Remembrance.h"
+#include "Engine.h"
 #include "FlyingComp.h"
 
 
@@ -37,6 +38,7 @@ UFlyingComp::UFlyingComp()
 	MaxPitchStrenght = 50.f;
 	MaxRollStrenght = 50.f;
 	MaxYawStrenght = 50.f;
+	TraceLenght = 3000.f;
 }
 
 
@@ -52,13 +54,15 @@ void UFlyingComp::BeginPlay()
 //Called every frame
 void UFlyingComp::MyOwnTick(float DeltaTime)
 {
+	WallRayCasting();
+
 	const FVector LocalMove = FVector(CurrentForwardSpeed * DeltaTime, 0.f, 0.f);
 
 //	FlyingCollisionTrigger();
 	if (GetOwner()->GetActorForwardVector().Z < 0)
-		CurrentForwardSpeed -= GetOwner()->GetActorRotation().Pitch * DeltaTime * PitchVelocityGain;
+		CurrentForwardSpeed -= GetOwner()->GetActorForwardVector().Z * DeltaTime * PitchVelocityGain;
 	else if (GetOwner()->GetActorForwardVector().Z > 0)
-		CurrentForwardSpeed -= GetOwner()->GetActorRotation().Pitch * DeltaTime * PitchVelocityLoss;
+		CurrentForwardSpeed -= GetOwner()->GetActorForwardVector().Z * DeltaTime * PitchVelocityLoss;
 
 	CurrentForwardSpeed -= DeltaTime * SpeedLossEachSecond;
 
@@ -73,7 +77,7 @@ void UFlyingComp::MyOwnTick(float DeltaTime)
 	// Move plan forwards (with sweep so we stop when we collide with things)
 	GetOwner()->AddActorLocalOffset(LocalMove, true);
 
-	UE_LOG(LogTemp, Warning, TEXT("Values: %f : %f : %f"), PushValue, bCollisionDetected, LenghtToObject);
+	//UE_LOG(LogTemp, Warning, TEXT("Speed: %f"), CurrentForwardSpeed);
 
 
 	// Calculate change in rotation this frame
@@ -89,6 +93,27 @@ void UFlyingComp::MyOwnTick(float DeltaTime)
 	GetOwner()->AddActorLocalRotation(DeltaRotation);
 }
 
+void UFlyingComp::WallRayCasting()
+{
+	FHitResult* HitResult = new FHitResult();
+	FVector StartTrace = GetOwner()->GetActorLocation();
+	FVector EndTrace = StartTrace + (GetOwner()->GetActorForwardVector() * TraceLenght);
+	FCollisionQueryParams* TraceParams = new FCollisionQueryParams();
+
+	if (GetWorld()->LineTraceSingleByChannel(*HitResult, StartTrace, EndTrace, ECC_Visibility, *TraceParams))
+	{
+		DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor(255, 0,0), true);
+
+		bCollisionDetected = HitResult->bBlockingHit;
+		LenghtToObject = (HitResult->ImpactPoint - GetOwner()->GetActorLocation()).Size();
+		PushValue = FVector::CrossProduct(HitResult->ImpactNormal, GetOwner()->GetActorForwardVector()).Z;
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, FString::Printf(TEXT("Value: %f"), PushValue));
+	}
+	else
+		bCollisionDetected = false;
+
+}
+
 // Called every frame
 void UFlyingComp::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction )
 {
@@ -99,8 +124,6 @@ void UFlyingComp::MoveUpInput(float Val)
 {
 	float TargetPitchSpeed = 0.0f;
 	// Target pitch speed is based in input
-
-	UE_LOG(LogTemp, Warning, TEXT("PitchSpeed: %f"), GetOwner()->GetActorRotation().Pitch);
 
 
 	//if(CurrentForwardSpeed > MaxSpeed / 3)
@@ -144,14 +167,17 @@ void UFlyingComp::MoveRightInput(float Val)
 	{
 		float Pushing = 0.f;
 
-		if (PushValue < -0.0001f)
+		if (PushValue < -0.001f)
 			Pushing = 1.f;
-		else if (PushValue > 0.0001f)
+		else if (PushValue > 0.001f)
 			Pushing = -1.f;
 
 		TargetRollSpeed = FMath::Clamp(((Pushing * TurnSpeed * RollScale * FMath::Clamp((MaxRollAngle - GetOwner()->GetActorRotation().Roll * Pushing), 0.f, 1.f)) * WallCollisionPushStrenght / LenghtToObject), -MaxRollStrenght, MaxRollStrenght);
-		TargetPitchSpeed = FMath::Clamp(((Pushing * TurnSpeed * PitchScale * FMath::Clamp(((GetOwner()->GetActorRotation().Roll * Pushing) / MaxRollAngle), 0.f, 1.f) * FMath::Clamp((30 + GetOwner()->GetActorRotation().Pitch * Pushing), 0.f, 1.f)) * WallCollisionPushStrenght / LenghtToObject), -MaxPitchStrenght, MaxPitchStrenght);
+		TargetPitchSpeed = FMath::Clamp(((TurnSpeed * PitchScale * FMath::Clamp(((GetOwner()->GetActorRotation().Roll * Pushing) / MaxRollAngle), 0.f, 1.f) * FMath::Clamp((30 + GetOwner()->GetActorRotation().Pitch * Pushing), 0.f, 1.f)) * WallCollisionPushStrenght / LenghtToObject), -MaxPitchStrenght, MaxPitchStrenght);
 		TargetYawSpeed = FMath::Clamp(((Pushing * TurnSpeed * YawScale * FMath::Clamp((MaxRollAngle / (GetOwner()->GetActorRotation().Roll * Pushing)), 0.f, 1.f)) * WallCollisionPushStrenght / LenghtToObject), -MaxYawStrenght, MaxYawStrenght);
+
+
+		UE_LOG(LogTemp, Warning, TEXT("Y, P, R: %f"), WallCollisionPushStrenght / LenghtToObject);
 	}
 
 

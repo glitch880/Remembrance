@@ -122,6 +122,10 @@ private:
 	UPROPERTY(Category = Collision, EditAnywhere)
 		float MaxRollStrenght;
 
+	/** The Strenght which the wall will push the player each second */
+	UPROPERTY(Category = Collision, EditAnywhere)
+		float TraceLenght;
+
 	/** The minimum force which will push the plane down each second*/
 	UPROPERTY(Category = Pitch, EditAnywhere)
 		float MinPitchdownForce;
@@ -148,5 +152,8 @@ private:
 
 	/** Current roll speed */
 	float CurrentRollSpeed;
+
+	/** Function that is being called to check if we are colliding with a wall or not*/
+	void WallRayCasting();
 	
 };
