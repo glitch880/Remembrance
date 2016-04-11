@@ -161,19 +161,29 @@ void ARemembranceCharacter::Tick(float DeltaSeconds)
 		FRotator YawRotation(0, Rotation.Yaw, 0);
 
 		FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Z);
-		AddMovementInput(Direction, fSwimHeightVector*fTransformedSwimSpeed*DeltaSeconds);
+		AddMovementInput(Direction, fSwimHeightVector*fTransformedSwimSpeed*DeltaSeconds);  //TODO should not use transformed speed here
 
 		//if not submerged
-		if (!bSubmerged && fSwimHeightVector > 0 && GetCharacterMovement()->Velocity.Z > 0  && !bHasJumpedInWater)
+		if (!bSubmerged && fSwimHeightVector > 0 && GetCharacterMovement()->Velocity.Z >= 0  && !bHasJumpedInWater)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Activating jump out of water  %f %f"), GetCharacterMovement()->Velocity.Z, GetVelocity().Z));
-			float vel = GetVelocity().Z * 2;
-			if (vel < fMinWaterJumpVelocity)
-				vel = fMinWaterJumpVelocity;
+			//float vel = GetVelocity().Z * 2;
+			//if (vel < fMinWaterJumpVelocity)
+				//vel = fMinWaterJumpVelocity;
 
 			//GetCharacterMovement()->AddImpulse(FVector(0, 0, GetCharacterMovement()->Velocity.Z*10)*fSwimHeightVector, true);
-			GetCharacterMovement()->Velocity.Z += vel;
+			//GetCharacterMovement()->Velocity.Z += vel;
+			//GetCharacterMovement()->AddImpulse(FVector(0, 0, 5000.f), true);
+
+			GetCharacterMovement()->Velocity.Z += 2000;
+
+			GetCharacterMovement()->Velocity.Z =  FMath::Clamp(GetCharacterMovement()->Velocity.Z, 2000.f, 6000.f);
 			
+			
+
+
+		//	AddMovementInput(Direction, 4000.f);
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("after activation  %f %f"), GetCharacterMovement()->Velocity.Z, GetVelocity().Z));
 			bHasJumpedInWater = true;
 			//LaunchCharacter((FVector(0, 0, GetCharacterMovement()->Velocity.Z )*fSwimHeightVector), true, true);
 			//GetCharacterMovement()->Launch(FVector(0, 0, GetCharacterMovement()->Velocity.Z)*fSwimHeightVector);
