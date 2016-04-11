@@ -14,6 +14,10 @@ class ARemembranceCharacter : public ACharacter
 
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UFlyingComp* FlyingComponent;
+
+	/** Follow camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
 
 public:
@@ -122,7 +126,7 @@ protected:
 	// End of APawn interface
 
 	/** This happens when switching from one Movement_type to another manually */
-	void SwitchMovementType(EMovementMode Mode, uint8 Custom);
+	void SwitchMovementType(EMovementMode Mode);
 
 	/** Function that checks if we should start flying */
 	void CheckIfWeShouldFly(float DeltaSeconds);
@@ -159,6 +163,19 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Swimming")
 	void CheckSubmerged();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Flying")
+		void FlyingCollisionTrigger();
+
+	UFUNCTION(BlueprintCallable, Category = "Flying")
+		void SetLengthToObject(float Lenght);
+
+	UFUNCTION(BlueprintCallable, Category = "Flying")
+		void SetCollisionDetected(bool Collision);
+
+	UFUNCTION(BlueprintCallable, Category = "Flying")
+		void SetPushValue(float value);
+	
 
 };
 
