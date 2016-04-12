@@ -31,7 +31,6 @@ ARemembranceCharacter::ARemembranceCharacter()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 	bCanFly = false;
-
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
@@ -41,7 +40,7 @@ ARemembranceCharacter::ARemembranceCharacter()
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->AttachTo(RootComponent);
-	CameraBoom->TargetArmLength = 300.0f; // The camera follows at this distance behind the character	
+	CameraBoom->TargetArmLength = 1200.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
 	// Create a follow camera
@@ -200,6 +199,13 @@ void ARemembranceCharacter::Tick(float DeltaSeconds)
 		break;
 	}
 	case MOVE_Flying:
+		
+		UE_LOG(LogTemp, Warning, TEXT("Normalize Camera Pitch: %f Roll: %f"), CameraBoom->RelativeRotation.Pitch, CameraBoom->RelativeRotation.Roll); //TODO smooth camera movement 
+		CameraBoom->SetRelativeRotation(FMath::RInterpTo(CameraBoom->RelativeRotation, FRotator(0, 0, 0), GetWorld()->GetDeltaSeconds(), 2.f));
+		UE_LOG(LogTemp, Warning, TEXT("Normalize camera Pitch: %f Roll: %f"), CameraBoom->RelativeRotation.Pitch, CameraBoom->RelativeRotation.Roll);
+		CameraBoom->TargetArmLength = FMath::FInterpTo(CameraBoom->TargetArmLength, 1200.f, GetWorld()->GetDeltaSeconds(), 2.f); //TODO this fixes the "popping" of the camera boom but if you pitch out of the ground you dont get the boom back
+
+		GetController()->SetControlRotation(FRotator(CameraBoom->GetComponentRotation().Pitch, GetActorRotation().Yaw, CameraBoom->GetComponentRotation().Roll));
 
 		//If we are flying, we should constantly check if we should continue or stop.
 		CheckIfWeShouldStopFlying(DeltaSeconds);
@@ -513,16 +519,20 @@ void ARemembranceCharacter::CheckIfWeShouldFly(float DeltaSeconds)
 {
 	fCurrentFallTime += 1.0f * DeltaSeconds;
 
+
 	if (fCurrentFallTime >= fFallTimeBeforeFlying)
 	{
+		
 		OnTimeTriggered();
 		if (!bCanFly)
 		{
 			SwitchMovementType(MOVE_Flying);
 			GetCapsuleComponent()->SetSimulatePhysics(true);
 			CameraBoom->bUsePawnControlRotation = false;
-			CameraBoom->TargetArmLength = 1200.f;
+		//	CameraBoom->TargetArmLength = 1200.f;
 			UE_LOG(LogTemp, Warning, TEXT("You are now flying as a bird!"));
+
+			//CameraBoom->SetRelativeRotation(FRotator( 0, 0, 0));
 		}
 	}
 }
@@ -534,15 +544,35 @@ void ARemembranceCharacter::CheckIfWeShouldStopFlying(float DeltaSeconds)
 	if (bCanSwitchToWalking)
 	{
 		fCurrentGroundTime += 1.0f * DeltaSeconds;
+		if(GetActorRotation().Pitch < 0 || GetActorRotation().Pitch > 230.f)
+			SetActorRotation(FMath::RInterpTo(GetActorRotation(), FRotator(0, GetActorRotation().Yaw, GetActorRotation().Roll), GetWorld()->GetDeltaSeconds(), 10.0f));
+		if(GetActorRotation().Roll  > 10 || GetActorRotation().Roll < -10 )
+			SetActorRotation(FMath::RInterpTo(GetActorRotation(), FRotator(GetActorRotation().Pitch, GetActorRotation().Yaw, 0), GetWorld()->GetDeltaSeconds(), 10.0f));
 
+
+	//	SetActorRotation(FMath::RInterpTo(GetActorRotation(), FRotator(0, GetActorRotation().Yaw, 0), GetWorld()->GetDeltaSeconds(), 20.0f));
+		UE_LOG(LogTemp, Warning, TEXT("Normalize Pitch: %f Roll: %f"), GetActorRotation().Pitch, GetActorRotation().Roll);
+		
+		CameraBoom->TargetArmLength = FMath::FInterpTo(CameraBoom->TargetArmLength, 600.f, GetWorld()->GetDeltaSeconds(), 10.f); //TODO this fixes the "popping" of the camera boom but if you pitch out of the ground you dont get the boom back
+	
 		if (fCurrentGroundTime >= GroundTimeBeforeShapeshift)
 		{
 			SwitchMovementType(MOVE_Walking);
 			GetCapsuleComponent()->SetSimulatePhysics(false);
 			CameraBoom->bUsePawnControlRotation = true;
+			
 			CameraBoom->TargetArmLength = 600.f;
+			CameraBoom->bInheritRoll = true;  //make the camera straight
+			//CameraBoom->SetWorldRotation(FRotator(0, GetActorRotation().Yaw, 0));
+		//	CameraBoom->RelativeRotation.Yaw = GetActorRotation().Yaw;
+			GetController()->SetControlRotation(FRotator(0, GetActorRotation().Yaw,0));  //enough to set the camera behind the character as it lands
+
+			//FRotator temp = FMath::RInterpTo(GetActorRotation(), FRotator(0, 0, 0), DeltaSeconds, 1.0f);
+			//SetActorRotation(FMath::RInterpTo(GetActorRotation(), FRotator(0, 0, 0), GetWorld()->GetDeltaSeconds(), 10.0f));
+			SetActorRotation(FRotator(0, GetActorRotation().Yaw, 0));
 		}
 	}
+	CameraBoom->TargetArmLength = FMath::FInterpTo(CameraBoom->TargetArmLength, 1200.f, GetWorld()->GetDeltaSeconds(), 10.f); //TODO test
 }
 //Transform into water creature. Change swim speed, model, anim, effects mm.
 void ARemembranceCharacter::TransformWater()
