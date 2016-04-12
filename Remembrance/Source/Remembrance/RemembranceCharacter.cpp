@@ -184,9 +184,6 @@ void ARemembranceCharacter::Tick(float DeltaSeconds)
 			GetCharacterMovement()->Velocity.Z += 2000;
 
 			GetCharacterMovement()->Velocity.Z =  FMath::Clamp(GetCharacterMovement()->Velocity.Z, 2000.f, 6000.f);
-			
-			
-
 
 		//	AddMovementInput(Direction, 4000.f);
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("after activation  %f %f"), GetCharacterMovement()->Velocity.Z, GetVelocity().Z));
